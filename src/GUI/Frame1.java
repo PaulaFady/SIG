@@ -1,13 +1,22 @@
+package GUI;
+
+import lib.Item;
 import lib.Table;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.List;
 
 public class Frame1 extends JFrame implements ActionListener {
+
     private JTable invoicesTable;
     private JTable invoiceItemsTable;
     private JMenuBar menuBar;
@@ -29,6 +38,7 @@ public class Frame1 extends JFrame implements ActionListener {
     private JPanel invoiceItemsPanel = new JPanel();
     private JTextField invoiceDateTf;
     private JTextField customerNameTf;
+    private Table tableData;
 
 
 //Constructor
@@ -50,7 +60,18 @@ public class Frame1 extends JFrame implements ActionListener {
         load.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                tableData = new Table();
+                var invoices = tableData.getInvoices();
+                var tableModel = new DefaultTableModel();
+                tableModel.addColumn("No.");
+                tableModel.addColumn("Date");
+                tableModel.addColumn("Customer");
+                tableModel.addColumn("Total");
 
+                for (lib.Invoice invoice : invoices) {
+                    tableModel.addRow(new String[]{String.valueOf(invoice.getNumber()), invoice.getDate(), invoice.getName(), String.valueOf(invoice.getTotal())});
+                }
+                invoicesTable.setModel(tableModel);
             }
         });
         save.addActionListener(new ActionListener() {
@@ -64,20 +85,36 @@ public class Frame1 extends JFrame implements ActionListener {
 //Left Panel
         leftPanel.setBounds(0,0,350,500);
         String[] invTableCols = {"No.", "Date", "Customer", "Total"};
-        String[][] invTableData = {
-                {"1", "22-11-2020", "Ali", "1500"},
-                {"2", "13-10-2021", "Saleh", "500"},
-                {"","","",""}
-        };
+        String[][] invTableData = {};
 
         invoicesTable = new JTable(invTableData, invTableCols);
+        invoicesTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                var invoice = tableData.getInvoices().get(invoicesTable.getSelectedRow());
+                var tableModel = new DefaultTableModel();
+                tableModel.addColumn("No.");
+                tableModel.addColumn("Item Name");
+                tableModel.addColumn("Item Price");
+                tableModel.addColumn("Count");
+                tableModel.addColumn("Item Total");
+
+                List<Item> items = invoice.getItems();
+                for (int i = 0; i < items.size(); i++) {
+                    Item item = items.get(i);
+                    tableModel.addRow(new String[]{String.valueOf(i+1), item.getName(), String.valueOf(item.getPrice()), String.valueOf(item.getCount()), String.valueOf(item.getTotal())});
+                }
+                invoiceItemsTable.setModel(tableModel);
+            }
+        });
         deleteInvoice = new JButton("Delete Invoice");
-//        deleteInvoice.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//
-//            }
-//        });
+        deleteInvoice.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+
+            }
+        });
         createNewInvoice = new JButton("Create New Invoice");
         invoiceDataPanel5.add(deleteInvoice);
         invoiceDataPanel5.add(createNewInvoice);
@@ -101,12 +138,7 @@ public class Frame1 extends JFrame implements ActionListener {
         invoiceDateTf = new JTextField(15);
         customerNameTf = new JTextField(15);
         String[] invItemsTableCols = {"No.", "Item Name", "Item Price", "Count", "Item Total"};
-        String[][] invItemsTableData = {
-                {"","","","",""},
-                {"","","","",""},
-                {"","","","",""},
-                {"","","","",""}
-        };
+        String[][] invItemsTableData = {};
         invoiceItemsTable = new JTable(invItemsTableData, invItemsTableCols);
         invoiceDataPanel1.add(new JLabel("Invoice Number "));
         invoiceDataPanel2.add(new JLabel("Invoice Date "));

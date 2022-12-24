@@ -50,5 +50,15 @@ public class Invoice {
     }
     public void addItem(Item item) {
         items.add(item);
+
     }
+
+    public double getTotal() {
+        double total = 0;
+        for(var item:items){
+            total += item.getTotal();
+        }
+        return total;
+    }
+
 }
