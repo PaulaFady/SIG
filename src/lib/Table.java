@@ -28,15 +28,10 @@ public class Table {
     public void addInvoice(Invoice invoice){
         this.invoices.add(invoice);
     }
-    public void deleteInvoiceByNumber(int number){
-        int id = -1;
-        for(int i=0 ; i< invoices.size(); i++){
-            if(invoices.get(i).getNumber()== number){
-                id = i;
-            }
-        }
-        if(id >=0){
-            invoices.remove(id);
+    public void deleteInvoice(int index){
+
+        if(index >=0 && index < invoices.size()){
+            invoices.remove(index);
         }
     }
     public Invoice getInvoiceByNumber(int number){
@@ -46,6 +41,12 @@ public class Table {
             }
         }
         return null;
+    }
+
+    public void editInvoiceByIndex(int index, String date, String cusName, List<Item> items){
+        invoices.get(index).setDate(date);
+        invoices.get(index).setName(cusName);
+        invoices.get(index).setItems(items);
     }
         private void uploadInvoicesFromFileToTable(String invoicesFilePath){
         try {
