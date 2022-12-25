@@ -131,10 +131,10 @@ public class MainFrame extends JFrame implements ActionListener {
             public void actionPerformed(ActionEvent e) {
             tableData.deleteInvoice(invoicesJTable.getSelectedRow());
                 refreshInvoicesJTable(tableData.getInvoices());
-                for(int i=0; i< tableData.getInvoices().size();i++){
-                    tableData.getInvoices().get(i).setNumber(i+1);
-                }
-                refreshInvoicesJTable(tableData.getInvoices());
+//                for(int i=0; i< tableData.getInvoices().size();i++){
+//                    tableData.getInvoices().get(i).setNumber(i+1);
+//                }
+//                refreshInvoicesJTable(tableData.getInvoices());
 
             }
         });
@@ -187,7 +187,7 @@ public class MainFrame extends JFrame implements ActionListener {
                     if (tableData == null){
                         tableData = new Table();
                     }
-                    invoice = new Invoice(tableData.getInvoices().size()+1, date, cusName);
+                    invoice = new Invoice(tableData.getInvoices().get(tableData.getInvoices().size()-1).getNumber()+1, date, cusName);
                     tableData.addInvoice(invoice);
                 }
                 var oldItems = invoice.getItems();
