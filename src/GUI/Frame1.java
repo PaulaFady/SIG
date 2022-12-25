@@ -61,6 +61,7 @@ public class Frame1 extends JFrame implements ActionListener {
         menuBar = new JMenuBar();
         menuBar.add(fileMenu);
         setJMenuBar(menuBar);
+// Load Action
         load.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -69,15 +70,17 @@ public class Frame1 extends JFrame implements ActionListener {
                 refreshInvoicesJTable(invoices);
             }
         });
+// Save Action
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
 
             }
         });
 
         setLayout(new BoxLayout(getContentPane(),BoxLayout.X_AXIS));
-//Left Panel
+// Left Panel
         leftPanel.setBounds(0,0,350,500);
         String[] invTableCols = {"No.", "Date", "Customer", "Total"};
         String[][] invTableData = {};
@@ -88,6 +91,7 @@ public class Frame1 extends JFrame implements ActionListener {
             }
         }
         ;
+// View Selected Invoice
         invoicesJTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -121,31 +125,35 @@ public class Frame1 extends JFrame implements ActionListener {
             }
         });
         deleteInvoice = new JButton("Delete Invoice");
+// Delete Button Action
         deleteInvoice.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
             tableData.deleteInvoice(invoicesJTable.getSelectedRow());
                 refreshInvoicesJTable(tableData.getInvoices());
+                for(int i=0; i< tableData.getInvoices().size();i++){
+                    tableData.getInvoices().get(i).setNumber(i+1);
+                }
+                refreshInvoicesJTable(tableData.getInvoices());
 
             }
         });
         createNewInvoice = new JButton("Create New Invoice");
+// Create Button Action
         createNewInvoice.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ((DefaultTableModel)(invoicesJTable.getModel())).addRow(new String[]{"", "", "", ""});
             }
         });
+// Left Panel Layout
         invoiceDataPanel5.add(deleteInvoice);
         invoiceDataPanel5.add(createNewInvoice);
         leftPanel.add(new JLabel("Invoices Table"));
         leftPanel.add(new JScrollPane(invoicesJTable));
         leftPanel.add(invoiceDataPanel5);
-//        Border blackline = BorderFactory.createLineBorder(Color.black);
-//        leftPanel.setBorder(blackline);
         add(leftPanel);
-
-//Right Panel
+ // Right Panel Layout
         rightPanel.setBounds(350,0,350,500);
         rightPanel.setLayout(new FlowLayout());
         invoiceDataPanel1.setBounds(355,5,345,50);
@@ -153,6 +161,7 @@ public class Frame1 extends JFrame implements ActionListener {
         invoiceDataPanel3.setBounds(355,115,345,50);
         invoiceDataPanel4.setBounds(355,170,345,50);
         addItem = new JButton("Add Item");
+// Add Item Action
         addItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -160,18 +169,20 @@ public class Frame1 extends JFrame implements ActionListener {
             }
         });
         saveBtn = new JButton("Save");
+// Save Button Action
         saveBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Edit Table
                 int index = invoicesJTable.getSelectedRow();
                 String date = invoiceDateTf.getText();
                 String cusName = customerNameTf.getText();
                 Invoice invoice;
+                // Edit Table
                 if(index < tableData.getInvoices().size() && index >=0){
                     invoice = tableData.getInvoices().get(index);
                     invoice.setName(cusName);
                     invoice.setDate(date);
+                // Create Table
                 } else{
                     if (tableData == null){
                         tableData = new Table();
@@ -197,6 +208,7 @@ public class Frame1 extends JFrame implements ActionListener {
             });
 
         cancel = new JButton("Cancel");
+// Cancel Button Action
         cancel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -213,13 +225,14 @@ public class Frame1 extends JFrame implements ActionListener {
                 customerNameTf.setText("");
             }
         });
-//        rightPanel.setBorder(blackline);
+
         invoiceDateTf = new JTextField(15);
         customerNameTf = new JTextField(15);
         String[] invItemsTableCols = {"No.", "Item Name", "Item Price", "Count", "Item Total"};
         String[][] invItemsTableData = {};
         invoiceItemsJTable = new JTable(invItemsTableData, invItemsTableCols);
         invoiceItemsJTable.setModel(new DefaultTableModel());
+// Right Panel Layout
         invoiceDataPanel1.add(invNoLabel);
         invoiceDataPanel2.add(new JLabel("Invoice Date "));
         invoiceDataPanel2.add(invoiceDateTf);

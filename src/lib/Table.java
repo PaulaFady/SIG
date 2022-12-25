@@ -9,8 +9,8 @@ import java.util.List;
 
 public class Table {
     private List<Invoice> invoices;
-    private final String INVOICES_FILE_PATH = "C:\\Users\\Paula Fady\\IdeaProjects\\SIG\\src\\InvoiceHeader.csv";
-    private final String ITEMS_FILE_PATH = "C:\\Users\\Paula Fady\\IdeaProjects\\SIG\\src\\InvoiceLine.csv";
+    private final String INVOICES_FILE_PATH = "src/InvoiceHeader.csv";
+    private final String ITEMS_FILE_PATH = "src/InvoiceLine.csv";
 
     public Table() {
         invoices = new ArrayList<>();
