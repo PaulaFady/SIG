@@ -1,11 +1,8 @@
-import GUI.Frame1;
-import lib.Invoice;
-import lib.Item;
-import lib.Table;
+import GUI.MainFrame;
 
 public class Main {
     public static void main(String[] args) {
-    Frame1 f = new Frame1();
+    MainFrame f = new MainFrame();
 
 
     }

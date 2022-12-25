@@ -1,9 +1,6 @@
 package lib;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -96,4 +93,47 @@ public class Table {
             ioe.printStackTrace();
         }
     }
-}
+    public void writeInvoicesOnFile (){
+        int invNo;
+        String date;
+        String cusName;
+        File headerFile = new File(INVOICES_FILE_PATH);
+        File lineFile = new File(ITEMS_FILE_PATH);
+        try(FileWriter writer = new FileWriter(headerFile)) {
+            for (Invoice invoice : invoices) {
+                invNo = invoice.getNumber();
+                date = invoice.getDate();
+                cusName = invoice.getName();
+                writer.write(String.valueOf(invNo));
+                writer.write(",");
+                writer.write(date);
+                writer.write(",");
+                writer.write(cusName);
+                writer.write("\n");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try(FileWriter writer = new FileWriter(lineFile)) {
+            for (Invoice invoice : invoices) {
+                invNo = invoice.getNumber();
+                for(Item item : invoice.getItems()){
+                    String itemName = item.getName();
+                    String itemPrice = String.valueOf(item.getPrice());
+                    String itemCount = String.valueOf(item.getCount());
+                    writer.write(String.valueOf(invNo));
+                    writer.write(",");
+                    writer.write(itemName);
+                    writer.write(",");
+                    writer.write(itemPrice);
+                    writer.write(",");
+                    writer.write(itemCount);
+                    writer.write("\n");
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        }
+    }
+

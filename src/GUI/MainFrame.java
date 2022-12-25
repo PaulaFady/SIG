@@ -15,7 +15,7 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Frame1 extends JFrame implements ActionListener {
+public class MainFrame extends JFrame implements ActionListener {
 
     private JTable invoicesJTable;
     private JTable invoiceItemsJTable;
@@ -45,7 +45,7 @@ public class Frame1 extends JFrame implements ActionListener {
 
 
 //Constructor
-    public Frame1() {
+    public MainFrame() {
         super("Sales Invoice Generator");
         tableData = new Table();
         setSize(1000, 550);
@@ -74,7 +74,7 @@ public class Frame1 extends JFrame implements ActionListener {
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+            tableData.writeInvoicesOnFile();
 
             }
         });
@@ -269,6 +269,7 @@ public class Frame1 extends JFrame implements ActionListener {
         }
         invoicesJTable.setModel(tableModel);
     }
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
