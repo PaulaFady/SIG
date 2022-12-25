@@ -1,25 +1,24 @@
 package GUI;
 
+import lib.Invoice;
 import lib.Item;
 import lib.Table;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Frame1 extends JFrame implements ActionListener {
 
-    private JTable invoicesTable;
-    private JTable invoiceItemsTable;
+    private JTable invoicesJTable;
+    private JTable invoiceItemsJTable;
     private JMenuBar menuBar;
     private JMenuItem load;
     private JMenuItem save;
@@ -48,6 +47,7 @@ public class Frame1 extends JFrame implements ActionListener {
 //Constructor
     public Frame1() {
         super("Sales Invoice Generator");
+        tableData = new Table();
         setSize(1000, 550);
         setLocation(200, 50);
 //Menu
@@ -66,16 +66,7 @@ public class Frame1 extends JFrame implements ActionListener {
             public void actionPerformed(ActionEvent e) {
                 tableData = new Table();
                 var invoices = tableData.getInvoices();
-                var tableModel = new DefaultTableModel();
-                tableModel.addColumn("No.");
-                tableModel.addColumn("Date");
-                tableModel.addColumn("Customer");
-                tableModel.addColumn("Total");
-
-                for (lib.Invoice invoice : invoices) {
-                    tableModel.addRow(new String[]{String.valueOf(invoice.getNumber()), invoice.getDate(), invoice.getName(), String.valueOf(invoice.getTotal())});
-                }
-                invoicesTable.setModel(tableModel);
+                refreshInvoicesJTable(invoices);
             }
         });
         save.addActionListener(new ActionListener() {
@@ -91,8 +82,13 @@ public class Frame1 extends JFrame implements ActionListener {
         String[] invTableCols = {"No.", "Date", "Customer", "Total"};
         String[][] invTableData = {};
 
-        invoicesTable = new JTable(invTableData, invTableCols);
-        invoicesTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+        invoicesJTable = new JTable(invTableData, invTableCols) {
+            public boolean editCellAt(int row, int column, java.util.EventObject e) {
+                return false;
+            }
+        }
+        ;
+        invoicesJTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 var tableModel = new DefaultTableModel();
@@ -102,22 +98,22 @@ public class Frame1 extends JFrame implements ActionListener {
                 tableModel.addColumn("Count");
                 tableModel.addColumn("Item Total");
 
-                if(invoicesTable.getSelectedRow() < 0 || invoicesTable.getSelectedRow() >= tableData.getInvoices().size()){
-                    invoiceItemsTable.setModel(tableModel);
+                if(invoicesJTable.getSelectedRow() < 0 || invoicesJTable.getSelectedRow() >= tableData.getInvoices().size()){
+                    invoiceItemsJTable.setModel(tableModel);
                     invNoLabel.setText("Invoice Number ");
                     invTotalLabel.setText("Invoice Total ");
                     invoiceDateTf.setText("");
                     customerNameTf.setText("");
                     return;
                 }
-                var invoice = tableData.getInvoices().get(invoicesTable.getSelectedRow());
+                var invoice = tableData.getInvoices().get(invoicesJTable.getSelectedRow());
 
                 List<Item> items = invoice.getItems();
                 for (int i = 0; i < items.size(); i++) {
                     Item item = items.get(i);
                     tableModel.addRow(new String[]{String.valueOf(i+1), item.getName(), String.valueOf(item.getPrice()), String.valueOf(item.getCount()), String.valueOf(item.getTotal())});
                 }
-                invoiceItemsTable.setModel(tableModel);
+                invoiceItemsJTable.setModel(tableModel);
                 invNoLabel.setText("Invoice Number "+ invoice.getNumber());
                 invTotalLabel.setText("Invoice Total "+ invoice.getTotal());
                 invoiceDateTf.setText(invoice.getDate());
@@ -128,17 +124,8 @@ public class Frame1 extends JFrame implements ActionListener {
         deleteInvoice.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-            tableData.deleteInvoice(invoicesTable.getSelectedRow());
-                var tableModel = new DefaultTableModel();
-                tableModel.addColumn("No.");
-                tableModel.addColumn("Date");
-                tableModel.addColumn("Customer");
-                tableModel.addColumn("Total");
-
-                for (lib.Invoice invoice : tableData.getInvoices()) {
-                    tableModel.addRow(new String[]{String.valueOf(invoice.getNumber()), invoice.getDate(), invoice.getName(), String.valueOf(invoice.getTotal())});
-                }
-                invoicesTable.setModel(tableModel);
+            tableData.deleteInvoice(invoicesJTable.getSelectedRow());
+                refreshInvoicesJTable(tableData.getInvoices());
 
             }
         });
@@ -146,13 +133,13 @@ public class Frame1 extends JFrame implements ActionListener {
         createNewInvoice.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ((DefaultTableModel)(invoicesTable.getModel())).addRow(new String[]{"", "", "", ""});
+                ((DefaultTableModel)(invoicesJTable.getModel())).addRow(new String[]{"", "", "", ""});
             }
         });
         invoiceDataPanel5.add(deleteInvoice);
         invoiceDataPanel5.add(createNewInvoice);
         leftPanel.add(new JLabel("Invoices Table"));
-        leftPanel.add(new JScrollPane(invoicesTable));
+        leftPanel.add(new JScrollPane(invoicesJTable));
         leftPanel.add(invoiceDataPanel5);
 //        Border blackline = BorderFactory.createLineBorder(Color.black);
 //        leftPanel.setBorder(blackline);
@@ -169,7 +156,7 @@ public class Frame1 extends JFrame implements ActionListener {
         addItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ((DefaultTableModel)(invoiceItemsTable.getModel())).addRow(new String[]{"", "", "", "", ""});
+                ((DefaultTableModel)(invoiceItemsJTable.getModel())).addRow(new String[]{"", "", "", "", ""});
             }
         });
         saveBtn = new JButton("Save");
@@ -177,20 +164,37 @@ public class Frame1 extends JFrame implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Edit Table
-            if(invoicesTable.getSelectedRow() <= tableData.getInvoices().size()){
-                List<Item> itemsFromGui = new ArrayList<>(invoiceItemsTable.getRowCount());
-                for(int i=0; i< invoiceItemsTable.getRowCount(); i++){
-                    itemsFromGui.get(i).setName((invoiceItemsTable.getModel().getValueAt(i,1)).toString());
-                    itemsFromGui.get(i).setPrice(Double.parseDouble((invoiceItemsTable.getModel().getValueAt(i,2)).toString()));
-                    itemsFromGui.get(i).setCount(Integer.parseInt((invoiceItemsTable.getModel().getValueAt(i,3)).toString()));
+                int index = invoicesJTable.getSelectedRow();
+                String date = invoiceDateTf.getText();
+                String cusName = customerNameTf.getText();
+                Invoice invoice;
+                if(index < tableData.getInvoices().size() && index >=0){
+                    invoice = tableData.getInvoices().get(index);
+                    invoice.setName(cusName);
+                    invoice.setDate(date);
+                } else{
+                    if (tableData == null){
+                        tableData = new Table();
+                    }
+                    invoice = new Invoice(tableData.getInvoices().size()+1, date, cusName);
+                    tableData.addInvoice(invoice);
                 }
-
-                tableData.editInvoiceByIndex(invoicesTable.getSelectedRow(), invoiceDateTf.getText(), customerNameTf.getText(), itemsFromGui);
-
-
+                var oldItems = invoice.getItems();
+                invoice.setItems(new ArrayList<>());
+                    try{
+                for(int i=0; i< invoiceItemsJTable.getRowCount(); i++){
+                    String itemName = String.valueOf((invoiceItemsJTable.getModel().getValueAt(i,1)));
+                    double itemPrice = Double.parseDouble(String.valueOf(invoiceItemsJTable.getModel().getValueAt(i,2)));
+                    int itemCount = Integer.parseInt(String.valueOf(invoiceItemsJTable.getModel().getValueAt(i,3)));
+                    Item item = new Item(itemName, itemPrice, itemCount);
+                    invoice.addItem(item);
+            }}
+                    catch (Exception ex){
+                        invoice.setItems(oldItems);
+                    }
+                refreshInvoicesJTable(tableData.getInvoices());
             }
-            }
-        });
+            });
 
         cancel = new JButton("Cancel");
         cancel.addActionListener(new ActionListener() {
@@ -202,7 +206,7 @@ public class Frame1 extends JFrame implements ActionListener {
                 tableModel.addColumn("Item Price");
                 tableModel.addColumn("Count");
                 tableModel.addColumn("Item Total");
-                invoiceItemsTable.setModel(tableModel);
+                invoiceItemsJTable.setModel(tableModel);
                 invNoLabel.setText("Invoice Number ");
                 invTotalLabel.setText("Invoice Total ");
                 invoiceDateTf.setText("");
@@ -214,7 +218,8 @@ public class Frame1 extends JFrame implements ActionListener {
         customerNameTf = new JTextField(15);
         String[] invItemsTableCols = {"No.", "Item Name", "Item Price", "Count", "Item Total"};
         String[][] invItemsTableData = {};
-        invoiceItemsTable = new JTable(invItemsTableData, invItemsTableCols);
+        invoiceItemsJTable = new JTable(invItemsTableData, invItemsTableCols);
+        invoiceItemsJTable.setModel(new DefaultTableModel());
         invoiceDataPanel1.add(invNoLabel);
         invoiceDataPanel2.add(new JLabel("Invoice Date "));
         invoiceDataPanel2.add(invoiceDateTf);
@@ -227,7 +232,7 @@ public class Frame1 extends JFrame implements ActionListener {
         rightPanel.add(invoiceDataPanel3);
         rightPanel.add(invoiceDataPanel4);
         rightPanel.add(new JLabel("Invoice Items"));
-        rightPanel.add(new JScrollPane(invoiceItemsTable));
+        rightPanel.add(new JScrollPane(invoiceItemsJTable));
         invoiceItemsPanel.add(addItem);
         invoiceItemsPanel.add(saveBtn);
         invoiceItemsPanel.add(cancel);
@@ -237,6 +242,19 @@ public class Frame1 extends JFrame implements ActionListener {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setVisible(true);
 
+    }
+
+    private void refreshInvoicesJTable(List<Invoice> tableData) {
+        var tableModel = new DefaultTableModel();
+        tableModel.addColumn("No.");
+        tableModel.addColumn("Date");
+        tableModel.addColumn("Customer");
+        tableModel.addColumn("Total");
+
+        for (Invoice invoice : tableData) {
+            tableModel.addRow(new String[]{String.valueOf(invoice.getNumber()), invoice.getDate(), invoice.getName(), String.valueOf(invoice.getTotal())});
+        }
+        invoicesJTable.setModel(tableModel);
     }
 
     @Override
