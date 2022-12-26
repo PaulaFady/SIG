@@ -1,8 +1,9 @@
-package GUI;
+package view;
 
-import lib.Invoice;
-import lib.Item;
-import lib.Table;
+import controller.Actions;
+import model.Invoice;
+import model.Item;
+import model.Table;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -74,7 +75,7 @@ public class MainFrame extends JFrame implements ActionListener {
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-            tableData.writeInvoicesOnFile();
+            Actions.writeInvoicesOnFile(tableData);
 
             }
         });

@@ -1,53 +1,19 @@
-package lib;
+package controller;
+
+import model.Invoice;
+import model.Item;
+import model.Table;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
-public class Table {
-    private List<Invoice> invoices;
-    private final String INVOICES_FILE_PATH = "src/InvoiceHeader.csv";
-    private final String ITEMS_FILE_PATH = "src/InvoiceLine.csv";
+public class Actions {
+    private static final String INVOICES_FILE_PATH = "src/InvoiceHeader.csv";
+    private static final String ITEMS_FILE_PATH = "src/InvoiceLine.csv";
 
-    public Table() {
-        invoices = new ArrayList<>();
-        uploadInvoicesFromFileToTable(INVOICES_FILE_PATH);
-        uploadItemsFromFileToTable(ITEMS_FILE_PATH);
-    }
 
-    public List<Invoice> getInvoices() {
-        return invoices;
-    }
-
-    public void setInvoices(List<Invoice> invoices) {
-        this.invoices = invoices;
-    }
-    public void addInvoice(Invoice invoice){
-        this.invoices.add(invoice);
-    }
-    public void deleteInvoice(int index){
-
-        if(index >=0 && index < invoices.size()){
-            invoices.remove(index);
-        }
-    }
-    public Invoice getInvoiceByNumber(int number){
-        for (Invoice invoice:invoices) {
-            if (invoice.getNumber() == number) {
-                return invoice;
-            }
-        }
-        return null;
-    }
-
-    public void editInvoiceByIndex(int index, String date, String cusName, List<Item> items){
-        invoices.get(index).setDate(date);
-        invoices.get(index).setName(cusName);
-        invoices.get(index).setItems(items);
-    }
-        private void uploadInvoicesFromFileToTable(String invoicesFilePath){
+    public static void uploadInvoicesFromFileToTable(Table table){
         try {
-            File file = new File(invoicesFilePath);
+            File file = new File(INVOICES_FILE_PATH);
             FileReader fr = new FileReader(file);
             BufferedReader br = new BufferedReader(fr);
             String line = "";
@@ -58,7 +24,7 @@ public class Table {
                 String date = invoiceData[1];
                 String name = invoiceData[2];
                 Invoice invoice = new Invoice(number, date, name);
-                addInvoice(invoice);
+                table.addInvoice(invoice);
 
 
             }
@@ -67,9 +33,9 @@ public class Table {
             ioe.printStackTrace();
         }
     }
-    private void uploadItemsFromFileToTable(String itemsFilePath){
+    public static void uploadItemsFromFileToTable(Table table){
         try {
-            File file = new File(itemsFilePath);
+            File file = new File(ITEMS_FILE_PATH);
             FileReader fr = new FileReader(file);
             BufferedReader br = new BufferedReader(fr);
             String line = "";
@@ -81,7 +47,7 @@ public class Table {
                 double price = Double.parseDouble(itemData[2]);
                 int count = Integer.parseInt(itemData[3]);
                 Item item = new Item(name, price, count);
-                Invoice invoice = getInvoiceByNumber(number);
+                Invoice invoice = table.getInvoiceByNumber(number);
                 if(invoice != null){
                     invoice.addItem(item);
                 }
@@ -93,14 +59,15 @@ public class Table {
             ioe.printStackTrace();
         }
     }
-    public void writeInvoicesOnFile (){
+
+    public static void writeInvoicesOnFile (Table table){
         int invNo;
         String date;
         String cusName;
         File headerFile = new File(INVOICES_FILE_PATH);
         File lineFile = new File(ITEMS_FILE_PATH);
         try(FileWriter writer = new FileWriter(headerFile)) {
-            for (Invoice invoice : invoices) {
+            for (Invoice invoice : table.getInvoices()) {
                 invNo = invoice.getNumber();
                 date = invoice.getDate();
                 cusName = invoice.getName();
@@ -115,7 +82,7 @@ public class Table {
             throw new RuntimeException(e);
         }
         try(FileWriter writer = new FileWriter(lineFile)) {
-            for (Invoice invoice : invoices) {
+            for (Invoice invoice : table.getInvoices()) {
                 invNo = invoice.getNumber();
                 for(Item item : invoice.getItems()){
                     String itemName = item.getName();
@@ -134,6 +101,5 @@ public class Table {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        }
     }
-
+}
