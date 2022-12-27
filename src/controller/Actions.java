@@ -61,8 +61,8 @@ public class Actions {
         int invNo;
         String date;
         String cusName;
-        File headerFile = new File(saveHeaderFilePath);
-        File lineFile = new File(saveLineFilePath);
+        File headerFile = new File(saveHeaderFilePath + ".csv");
+        File lineFile = new File(saveLineFilePath + ".csv");
         try(FileWriter writer = new FileWriter(headerFile)) {
             for (Invoice invoice : table.getInvoices()) {
                 invNo = invoice.getNumber();
