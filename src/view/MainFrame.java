@@ -35,14 +35,13 @@ public class MainFrame extends JFrame implements ActionListener {
     private JPanel invoiceDataPanel2 = new JPanel();
     private JPanel invoiceDataPanel3 = new JPanel();
     private JPanel invoiceDataPanel4 = new JPanel();
-    private JPanel invoiceDataPanel5 = new JPanel();
-
-    private JPanel invoiceItemsPanel = new JPanel();
+    private JPanel invoiceItemsButtonsPanel = new JPanel();
     private JTextField invoiceDateTf;
     private JTextField customerNameTf;
     private Table tableData;
     JLabel invNoLabel = new JLabel("Invoice Number ");
     JLabel invTotalLabel = new JLabel("Invoice Total ");
+    private static String loadPath;
 
 
 //Constructor
@@ -66,9 +65,13 @@ public class MainFrame extends JFrame implements ActionListener {
         load.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                tableData = new Table();
-                var invoices = tableData.getInvoices();
-                refreshInvoicesJTable(invoices);
+//                if (fc.showOpenDialog(NotePad.this) == JFileChooser.APPROVE_OPTION) {
+//                    loadPath = fc.getSelectedFile().getPath();
+//                }
+                initialLoad();
+//                tableData = new Table();
+//                var invoices = tableData.getInvoices();
+//                refreshInvoicesJTable(invoices);
             }
         });
 // Save Action
@@ -132,10 +135,6 @@ public class MainFrame extends JFrame implements ActionListener {
             public void actionPerformed(ActionEvent e) {
             tableData.deleteInvoice(invoicesJTable.getSelectedRow());
                 refreshInvoicesJTable(tableData.getInvoices());
-//                for(int i=0; i< tableData.getInvoices().size();i++){
-//                    tableData.getInvoices().get(i).setNumber(i+1);
-//                }
-//                refreshInvoicesJTable(tableData.getInvoices());
 
             }
         });
@@ -148,19 +147,14 @@ public class MainFrame extends JFrame implements ActionListener {
             }
         });
 // Left Panel Layout
-        invoiceDataPanel5.add(deleteInvoice);
-        invoiceDataPanel5.add(createNewInvoice);
         leftPanel.add(new JLabel("Invoices Table"));
         leftPanel.add(new JScrollPane(invoicesJTable));
-        leftPanel.add(invoiceDataPanel5);
+        leftPanel.add(deleteInvoice);
+        leftPanel.add(createNewInvoice);
         add(leftPanel);
  // Right Panel Layout
         rightPanel.setBounds(350,0,350,500);
         rightPanel.setLayout(new FlowLayout());
-        invoiceDataPanel1.setBounds(355,5,345,50);
-        invoiceDataPanel2.setBounds(355,60,345,50);
-        invoiceDataPanel3.setBounds(355,115,345,50);
-        invoiceDataPanel4.setBounds(355,170,345,50);
         addItem = new JButton("Add Item");
 // Add Item Action
         addItem.addActionListener(new ActionListener() {
@@ -169,7 +163,7 @@ public class MainFrame extends JFrame implements ActionListener {
                 ((DefaultTableModel)(invoiceItemsJTable.getModel())).addRow(new String[]{"", "", "", "", ""});
             }
         });
-        saveBtn = new JButton("Save");
+        saveBtn = new JButton("Save invoice");
 // Save Button Action
         saveBtn.addActionListener(new ActionListener() {
             @Override
@@ -247,16 +241,24 @@ public class MainFrame extends JFrame implements ActionListener {
         rightPanel.add(invoiceDataPanel4);
         rightPanel.add(new JLabel("Invoice Items"));
         rightPanel.add(new JScrollPane(invoiceItemsJTable));
-        invoiceItemsPanel.add(addItem);
-        invoiceItemsPanel.add(saveBtn);
-        invoiceItemsPanel.add(cancel);
-        rightPanel.add(invoiceItemsPanel);
+        invoiceItemsButtonsPanel.add(addItem);
+        invoiceItemsButtonsPanel.add(saveBtn);
+        invoiceItemsButtonsPanel.add(cancel);
+        rightPanel.add(invoiceItemsButtonsPanel);
         add(rightPanel);
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setVisible(true);
 
+        initialLoad();
     }
+    private void initialLoad(){
+        tableData = new Table();
+        var invoices = tableData.getInvoices();
+        refreshInvoicesJTable(invoices);
+    }
+
+    public static String getLoadPath(){return loadPath;};
 
     private void refreshInvoicesJTable(List<Invoice> tableData) {
         var tableModel = new DefaultTableModel();

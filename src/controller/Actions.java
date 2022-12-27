@@ -26,7 +26,6 @@ public class Actions {
                 Invoice invoice = new Invoice(number, date, name);
                 table.addInvoice(invoice);
 
-
             }
             br.close();
         } catch(IOException ioe) {
