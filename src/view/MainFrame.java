@@ -23,6 +23,7 @@ public class MainFrame extends JFrame implements ActionListener {
     private JMenuBar menuBar;
     private JMenuItem load;
     private JMenuItem save;
+    private JMenuItem saveAs;
 
     private JButton createNewInvoice;
     private JButton deleteInvoice;
@@ -41,7 +42,10 @@ public class MainFrame extends JFrame implements ActionListener {
     private Table tableData;
     JLabel invNoLabel = new JLabel("Invoice Number ");
     JLabel invTotalLabel = new JLabel("Invoice Total ");
-    private static String loadPath;
+    private static String loadHeaderPath;
+    private static String loadLinePath;
+    private static String headerFilePath = "0";
+    private static String lineFilePath = "0";
 
 
 //Constructor
@@ -55,33 +59,60 @@ public class MainFrame extends JFrame implements ActionListener {
         load.setAccelerator(KeyStroke.getKeyStroke('L', KeyEvent.CTRL_DOWN_MASK));
         save = new JMenuItem("Save File",'s');
         save.setAccelerator(KeyStroke.getKeyStroke('S',KeyEvent.CTRL_DOWN_MASK));
+        saveAs = new JMenuItem("Save As");
+        int down = KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK;
+        saveAs.setAccelerator(KeyStroke.getKeyStroke('S',down));
         JMenu fileMenu = new JMenu("File");
         fileMenu.add(load);
         fileMenu.add(save);
+        save.setEnabled(false);
+        fileMenu.add(saveAs);
         menuBar = new JMenuBar();
         menuBar.add(fileMenu);
         setJMenuBar(menuBar);
+
 // Load Action
         load.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                if (fc.showOpenDialog(NotePad.this) == JFileChooser.APPROVE_OPTION) {
-//                    loadPath = fc.getSelectedFile().getPath();
-//                }
-                initialLoad();
-//                tableData = new Table();
-//                var invoices = tableData.getInvoices();
-//                refreshInvoicesJTable(invoices);
+                JOptionPane.showMessageDialog(null, "Select the Header file first, then the Line file", "Load files", JOptionPane.PLAIN_MESSAGE);
+                JFileChooser fhc = new JFileChooser();
+                if (fhc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    loadHeaderPath = fhc.getSelectedFile().getPath();
+                }
+                JFileChooser flc = new JFileChooser();
+                if (flc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    loadLinePath = flc.getSelectedFile().getPath();
+                }
+                tableData = new Table(loadHeaderPath, loadLinePath);
+                var invoices = tableData.getInvoices();
+                refreshInvoicesJTable(invoices);
+                save.setEnabled(true);
             }
         });
 // Save Action
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-            Actions.writeInvoicesOnFile(tableData);
+
+                    Actions.writeInvoicesOnFile(tableData, loadHeaderPath, loadLinePath);
 
             }
         });
+        saveAs.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null, "Select the Header csv file destination first, then the Line file destination", "Save files as", JOptionPane.PLAIN_MESSAGE);
+                JFileChooser saveHeaderPath = new JFileChooser();
+                if (saveHeaderPath.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    headerFilePath = saveHeaderPath.getSelectedFile().getPath();
+                }
+                JFileChooser saveLinePath = new JFileChooser();
+                if (saveLinePath.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    lineFilePath = saveLinePath.getSelectedFile().getPath();
+                }
+                    Actions.writeInvoicesOnFile(tableData, headerFilePath, lineFilePath);
+            }});
 
         setLayout(new BoxLayout(getContentPane(),BoxLayout.X_AXIS));
 // Left Panel
@@ -257,8 +288,6 @@ public class MainFrame extends JFrame implements ActionListener {
         var invoices = tableData.getInvoices();
         refreshInvoicesJTable(invoices);
     }
-
-    public static String getLoadPath(){return loadPath;};
 
     private void refreshInvoicesJTable(List<Invoice> tableData) {
         var tableModel = new DefaultTableModel();

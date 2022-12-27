@@ -7,13 +7,11 @@ import model.Table;
 import java.io.*;
 
 public class Actions {
-    private static final String INVOICES_FILE_PATH = "src/InvoiceHeader.csv";
-    private static final String ITEMS_FILE_PATH = "src/InvoiceLine.csv";
 
 
-    public static void uploadInvoicesFromFileToTable(Table table){
+    public static void uploadInvoicesFromFileToTable(Table table, String headerPath){
         try {
-            File file = new File(INVOICES_FILE_PATH);
+            File file = new File(headerPath);
             FileReader fr = new FileReader(file);
             BufferedReader br = new BufferedReader(fr);
             String line = "";
@@ -32,9 +30,9 @@ public class Actions {
             ioe.printStackTrace();
         }
     }
-    public static void uploadItemsFromFileToTable(Table table){
+    public static void uploadItemsFromFileToTable(Table table, String linePath){
         try {
-            File file = new File(ITEMS_FILE_PATH);
+            File file = new File(linePath);
             FileReader fr = new FileReader(file);
             BufferedReader br = new BufferedReader(fr);
             String line = "";
@@ -59,12 +57,12 @@ public class Actions {
         }
     }
 
-    public static void writeInvoicesOnFile (Table table){
+    public static void writeInvoicesOnFile (Table table, String saveHeaderFilePath, String saveLineFilePath){
         int invNo;
         String date;
         String cusName;
-        File headerFile = new File(INVOICES_FILE_PATH);
-        File lineFile = new File(ITEMS_FILE_PATH);
+        File headerFile = new File(saveHeaderFilePath);
+        File lineFile = new File(saveLineFilePath);
         try(FileWriter writer = new FileWriter(headerFile)) {
             for (Invoice invoice : table.getInvoices()) {
                 invNo = invoice.getNumber();
@@ -101,4 +99,5 @@ public class Actions {
             throw new RuntimeException(e);
         }
     }
+
 }

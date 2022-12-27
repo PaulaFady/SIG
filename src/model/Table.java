@@ -1,6 +1,5 @@
 package model;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,8 +13,13 @@ public class Table {
 
     public Table() {
         invoices = new ArrayList<>();
-        uploadInvoicesFromFileToTable(this);
-        uploadItemsFromFileToTable(this);
+        uploadInvoicesFromFileToTable(this, INVOICES_FILE_PATH);
+        uploadItemsFromFileToTable(this, ITEMS_FILE_PATH);
+    }
+    public Table(String headerFile, String lineFile){
+        invoices = new ArrayList<>();
+        uploadInvoicesFromFileToTable(this, headerFile);
+        uploadItemsFromFileToTable(this, lineFile);
     }
 
     public List<Invoice> getInvoices() {
