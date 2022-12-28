@@ -3,7 +3,10 @@ package controller;
 import model.Invoice;
 import model.Item;
 import model.Table;
+import view.MainFrame;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 
 public class Actions {
@@ -61,8 +64,18 @@ public class Actions {
         int invNo;
         String date;
         String cusName;
-        File headerFile = new File(saveHeaderFilePath + ".csv");
-        File lineFile = new File(saveLineFilePath + ".csv");
+        File headerFile;
+        File lineFile;
+        if(saveHeaderFilePath.contains(".csv")){
+            headerFile = new File(saveHeaderFilePath);
+        } else {
+            headerFile = new File(saveHeaderFilePath + ".csv");
+        }
+        if(saveLineFilePath.contains(".csv")){
+            lineFile = new File(saveLineFilePath);
+        } else {
+            lineFile = new File(saveLineFilePath + ".csv");
+        }
         try(FileWriter writer = new FileWriter(headerFile)) {
             for (Invoice invoice : table.getInvoices()) {
                 invNo = invoice.getNumber();
@@ -73,7 +86,7 @@ public class Actions {
                 writer.write(date);
                 writer.write(",");
                 writer.write(cusName);
-                writer.write("\n");
+                writer.write(System.getProperty("line.separator"));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -92,12 +105,13 @@ public class Actions {
                     writer.write(itemPrice);
                     writer.write(",");
                     writer.write(itemCount);
-                    writer.write("\n");
+//                    writer.write("\n");
+                    writer.write(System.getProperty("line.separator"));
+
                 }
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-
 }

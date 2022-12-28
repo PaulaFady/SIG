@@ -44,8 +44,8 @@ public class MainFrame extends JFrame implements ActionListener {
     JLabel invTotalLabel = new JLabel("Invoice Total ");
     private static String loadHeaderPath;
     private static String loadLinePath;
-    private static String headerFilePath = "0";
-    private static String lineFilePath = "0";
+    private static String headerFilePath;
+    private static String lineFilePath;
 
 
 //Constructor
@@ -71,48 +71,10 @@ public class MainFrame extends JFrame implements ActionListener {
         menuBar.add(fileMenu);
         setJMenuBar(menuBar);
 
-// Load Action
-        load.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "Select the Header file first, then the Line file", "Load files", JOptionPane.PLAIN_MESSAGE);
-                JFileChooser fhc = new JFileChooser();
-                if (fhc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                    loadHeaderPath = fhc.getSelectedFile().getPath();
-                }
-                JFileChooser flc = new JFileChooser();
-                if (flc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                    loadLinePath = flc.getSelectedFile().getPath();
-                }
-                tableData = new Table(loadHeaderPath, loadLinePath);
-                var invoices = tableData.getInvoices();
-                refreshInvoicesJTable(invoices);
-                save.setEnabled(true);
-            }
-        });
-// Save Action
-        save.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        load.addActionListener(this);
+        save.addActionListener(this);
+        saveAs.addActionListener(this);
 
-                    Actions.writeInvoicesOnFile(tableData, loadHeaderPath, loadLinePath);
-
-            }
-        });
-        saveAs.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "Select the Header csv file destination first, then the Line file destination", "Save files as", JOptionPane.PLAIN_MESSAGE);
-                JFileChooser saveHeaderPath = new JFileChooser();
-                if (saveHeaderPath.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-                    headerFilePath = saveHeaderPath.getSelectedFile().getPath();
-                }
-                JFileChooser saveLinePath = new JFileChooser();
-                if (saveLinePath.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-                    lineFilePath = saveLinePath.getSelectedFile().getPath();
-                }
-                    Actions.writeInvoicesOnFile(tableData, headerFilePath, lineFilePath);
-            }});
 
         setLayout(new BoxLayout(getContentPane(),BoxLayout.X_AXIS));
 // Left Panel
@@ -160,23 +122,10 @@ public class MainFrame extends JFrame implements ActionListener {
             }
         });
         deleteInvoice = new JButton("Delete Invoice");
-// Delete Button Action
-        deleteInvoice.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            tableData.deleteInvoice(invoicesJTable.getSelectedRow());
-                refreshInvoicesJTable(tableData.getInvoices());
-
-            }
-        });
+        deleteInvoice.addActionListener(this);
         createNewInvoice = new JButton("Create New Invoice");
-// Create Button Action
-        createNewInvoice.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ((DefaultTableModel)(invoicesJTable.getModel())).addRow(new String[]{"", "", "", ""});
-            }
-        });
+        createNewInvoice.addActionListener(this);
+
 // Left Panel Layout
         leftPanel.add(new JLabel("Invoices Table"));
         leftPanel.add(new JScrollPane(invoicesJTable));
@@ -187,71 +136,11 @@ public class MainFrame extends JFrame implements ActionListener {
         rightPanel.setBounds(350,0,350,500);
         rightPanel.setLayout(new FlowLayout());
         addItem = new JButton("Add Item");
-// Add Item Action
-        addItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ((DefaultTableModel)(invoiceItemsJTable.getModel())).addRow(new String[]{"", "", "", "", ""});
-            }
-        });
+        addItem.addActionListener(this);
         saveBtn = new JButton("Save invoice");
-// Save Button Action
-        saveBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int index = invoicesJTable.getSelectedRow();
-                String date = invoiceDateTf.getText();
-                String cusName = customerNameTf.getText();
-                Invoice invoice;
-                // Edit Table
-                if(index < tableData.getInvoices().size() && index >=0){
-                    invoice = tableData.getInvoices().get(index);
-                    invoice.setName(cusName);
-                    invoice.setDate(date);
-                // Create Table
-                } else{
-                    if (tableData == null){
-                        tableData = new Table();
-                    }
-                    invoice = new Invoice(tableData.getInvoices().get(tableData.getInvoices().size()-1).getNumber()+1, date, cusName);
-                    tableData.addInvoice(invoice);
-                }
-                var oldItems = invoice.getItems();
-                invoice.setItems(new ArrayList<>());
-                    try{
-                for(int i=0; i< invoiceItemsJTable.getRowCount(); i++){
-                    String itemName = String.valueOf((invoiceItemsJTable.getModel().getValueAt(i,1)));
-                    double itemPrice = Double.parseDouble(String.valueOf(invoiceItemsJTable.getModel().getValueAt(i,2)));
-                    int itemCount = Integer.parseInt(String.valueOf(invoiceItemsJTable.getModel().getValueAt(i,3)));
-                    Item item = new Item(itemName, itemPrice, itemCount);
-                    invoice.addItem(item);
-            }}
-                    catch (Exception ex){
-                        invoice.setItems(oldItems);
-                    }
-                refreshInvoicesJTable(tableData.getInvoices());
-            }
-            });
-
+        saveBtn.addActionListener(this);
         cancel = new JButton("Cancel");
-// Cancel Button Action
-        cancel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                var tableModel = new DefaultTableModel();
-                tableModel.addColumn("No.");
-                tableModel.addColumn("Item Name");
-                tableModel.addColumn("Item Price");
-                tableModel.addColumn("Count");
-                tableModel.addColumn("Item Total");
-                invoiceItemsJTable.setModel(tableModel);
-                invNoLabel.setText("Invoice Number ");
-                invTotalLabel.setText("Invoice Total ");
-                invoiceDateTf.setText("");
-                customerNameTf.setText("");
-            }
-        });
-
+        cancel.addActionListener(this);
         invoiceDateTf = new JTextField(15);
         customerNameTf = new JTextField(15);
         String[] invItemsTableCols = {"No.", "Item Name", "Item Price", "Count", "Item Total"};
@@ -302,9 +191,103 @@ public class MainFrame extends JFrame implements ActionListener {
         invoicesJTable.setModel(tableModel);
     }
 
-
     @Override
     public void actionPerformed(ActionEvent e) {
 
+        if(e.getSource().equals(load)){
+            JOptionPane.showMessageDialog(null, "Select the Header file first, then the Line file", "Load files", JOptionPane.PLAIN_MESSAGE);
+            JFileChooser fhc = new JFileChooser();
+            if (fhc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                loadHeaderPath = fhc.getSelectedFile().getPath();
+            }
+            JFileChooser flc = new JFileChooser();
+            if (flc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                loadLinePath = flc.getSelectedFile().getPath();
+            }
+            tableData = new Table(loadHeaderPath, loadLinePath);
+            var invoices = tableData.getInvoices();
+            refreshInvoicesJTable(invoices);
+            save.setEnabled(true);
+        }
+
+        else if (e.getSource().equals(save)) {
+            Actions.writeInvoicesOnFile(tableData, loadHeaderPath, loadLinePath);
+                JOptionPane.showMessageDialog(null, "File saved successfully", "Note", JOptionPane.PLAIN_MESSAGE);
+        }
+
+        else if (e.getSource().equals(saveAs)) {
+            JOptionPane.showMessageDialog(null, "Select the Header csv file destination first, then the Line file destination", "Save files as", JOptionPane.PLAIN_MESSAGE);
+            JFileChooser saveHeaderPath = new JFileChooser();
+            if (saveHeaderPath.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+                headerFilePath = saveHeaderPath.getSelectedFile().getPath();
+            }
+            JFileChooser saveLinePath = new JFileChooser();
+            if (saveLinePath.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+                lineFilePath = saveLinePath.getSelectedFile().getPath();
+            }
+            Actions.writeInvoicesOnFile(tableData, headerFilePath, lineFilePath);
+        }
+
+        else if (e.getSource().equals(deleteInvoice)) {
+            tableData.deleteInvoice(invoicesJTable.getSelectedRow());
+            refreshInvoicesJTable(tableData.getInvoices());
+        }
+
+        else if (e.getSource().equals(createNewInvoice)){
+            ((DefaultTableModel)(invoicesJTable.getModel())).addRow(new String[]{"", "", "", ""});
+        }
+
+        else if (e.getSource().equals(addItem)) {
+            ((DefaultTableModel)(invoiceItemsJTable.getModel())).addRow(new String[]{"", "", "", "", ""});
+        }
+
+        else if (e.getSource().equals(saveBtn)) {
+            int index = invoicesJTable.getSelectedRow();
+            String date = invoiceDateTf.getText();
+            String cusName = customerNameTf.getText();
+            Invoice invoice;
+            // Edit Table
+            if(index < tableData.getInvoices().size() && index >=0){
+                invoice = tableData.getInvoices().get(index);
+                invoice.setName(cusName);
+                invoice.setDate(date);
+                // Create Table
+            } else{
+                if (tableData == null){
+                    tableData = new Table();
+                }
+                invoice = new Invoice(tableData.getInvoices().get(tableData.getInvoices().size()-1).getNumber()+1, date, cusName);
+                tableData.addInvoice(invoice);
+            }
+            var oldItems = invoice.getItems();
+            invoice.setItems(new ArrayList<>());
+            try{
+                for(int i=0; i< invoiceItemsJTable.getRowCount(); i++){
+                    String itemName = String.valueOf((invoiceItemsJTable.getModel().getValueAt(i,1)));
+                    double itemPrice = Double.parseDouble(String.valueOf(invoiceItemsJTable.getModel().getValueAt(i,2)));
+                    int itemCount = Integer.parseInt(String.valueOf(invoiceItemsJTable.getModel().getValueAt(i,3)));
+                    Item item = new Item(itemName, itemPrice, itemCount);
+                    invoice.addItem(item);
+                }}
+            catch (Exception ex){
+                invoice.setItems(oldItems);
+            }
+            refreshInvoicesJTable(tableData.getInvoices());
+        }
+
+        else if (e.getSource().equals(cancel)) {
+            var tableModel = new DefaultTableModel();
+            tableModel.addColumn("No.");
+            tableModel.addColumn("Item Name");
+            tableModel.addColumn("Item Price");
+            tableModel.addColumn("Count");
+            tableModel.addColumn("Item Total");
+            invoiceItemsJTable.setModel(tableModel);
+            invNoLabel.setText("Invoice Number ");
+            invTotalLabel.setText("Invoice Total ");
+            invoiceDateTf.setText("");
+            customerNameTf.setText("");
+        }
+
     }
-}
+    }
