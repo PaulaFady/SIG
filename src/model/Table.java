@@ -8,15 +8,11 @@ import static controller.Actions.uploadItemsFromFileToTable;
 
 public class Table {
     private List<Invoice> invoices;
-    private final String INVOICES_FILE_PATH = "src/InvoiceHeader.csv";
-    private final String ITEMS_FILE_PATH = "src/InvoiceLine.csv";
 
     public Table() {
         invoices = new ArrayList<>();
-        uploadInvoicesFromFileToTable(this, INVOICES_FILE_PATH);
-        uploadItemsFromFileToTable(this, ITEMS_FILE_PATH);
     }
-    public Table(String headerFile, String lineFile){
+    public void loadInvoices(String headerFile, String lineFile){
         invoices = new ArrayList<>();
         uploadInvoicesFromFileToTable(this, headerFile);
         uploadItemsFromFileToTable(this, lineFile);
@@ -45,12 +41,6 @@ public class Table {
             }
         }
         return null;
-    }
-
-    public void editInvoiceByIndex(int index, String date, String cusName, List<Item> items){
-        invoices.get(index).setDate(date);
-        invoices.get(index).setName(cusName);
-        invoices.get(index).setItems(items);
     }
     }
 
