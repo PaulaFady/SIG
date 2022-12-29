@@ -30,6 +30,6 @@ public class SaveAsAction implements ActionListener {
         Actions.writeInvoicesOnFile(tableData, headerFilePath, lineFilePath);
         Actions.setHeaderPathForSave(headerFilePath);
         Actions.setLinePathForSave(lineFilePath);
-//        save.setEnabled(true);
+        save.setEnabled(true);
     }
 }

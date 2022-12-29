@@ -125,15 +125,15 @@ public class Actions {
         return headerPathForSave;
     }
 
-    public static void setHeaderPathForSave(String headerPathForSave) {
-        headerPathForSave = headerPathForSave;
+    public static void setHeaderPathForSave(String headerPathForSave1) {
+        headerPathForSave = headerPathForSave1;
     }
 
     public static String getLinePathForSave() {
         return linePathForSave;
     }
 
-    public static void setLinePathForSave(String linePathForSave) {
-        linePathForSave = linePathForSave;
+    public static void setLinePathForSave(String linePathForSave1) {
+        linePathForSave = linePathForSave1;
     }
 }

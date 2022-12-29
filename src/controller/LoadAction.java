@@ -33,14 +33,6 @@ public class LoadAction implements ActionListener {
         invoicesJTable.setModel(Actions.refreshInvoicesJTable(tableData.getInvoices()));
         Actions.setHeaderPathForSave(loadHeaderPath);
         Actions.setLinePathForSave(loadLinePath);
-//        save.setEnabled(true);
-    }
-
-    public static String getLoadHeaderPath() {
-        return loadHeaderPath;
-    }
-
-    public static String getLoadLinePath() {
-        return loadLinePath;
+        save.setEnabled(true);
     }
 }
